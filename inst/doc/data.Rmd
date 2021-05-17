@@ -1,0 +1,92 @@
+---
+title: Clean aggregation 5 data
+author: Shir Dekel
+date: '`r format(Sys.time())`'
+output_format: html_document
+vignette: >
+  %\VignetteIndexEntry{Clean aggregation 5 data}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+Load packages and functions
+
+```{r}
+source(DataPackageR::project_path("packages.R"))
+project_path("R") %>%
+  list.files(full.names = TRUE) %>%
+  lapply(source)
+```
+
+Clean data
+
+```{r}
+data_raw <-
+  project_extdata_path("qualtrics") %>%
+  list.files(full.names = TRUE) %>%
+  map_dfr(~ .x %>%
+    read_csv(col_types = cols()))
+
+dvName <- c("forecast_mean", "forecast_sd")
+
+data_raw_renamed <-
+  data_raw %>%
+  rename(
+    reliability_amount = .data$npvCond,
+    alignment = .data$alignCond
+  ) %>%
+  shirthesis::clean_prolific()
+
+data_setup <-
+  data_raw_renamed %>%
+  select(contains("project"),
+    .data$reliability_amount,
+    .data$alignment,
+    "sex" = "Q79",
+    "age" = "Q75"
+  ) %>%
+  mutate(id = row_number()) %>%
+  pivot_longer(
+    cols = -(.data$reliability_amount:.data$id),
+    names_to = c("project", "forecast"),
+    names_pattern = "\\w*(.)_(.*)",
+    values_to = "dv",
+    values_drop_na = TRUE
+  ) %>%
+  mutate(
+    dv = as.numeric(.data$dv),
+    reliability_amount = recode(.data$reliability_amount, "1" = "Absent", "2" = "Present"),
+    alignment = recode(.data$alignment, "1" = "low", "2" = "high"),
+    age = recode(.data$age, "1984" = "35", "26 years" = "26"),
+    npv_amount = case_when(
+      project == 1 ~ "700",
+      project == 2 ~ "500",
+      project == 3 ~ "100",
+      project == 4 ~ "900",
+      project == 5 ~ "300"
+    ),
+    npv_amount = as.numeric(.data$npv_amount),
+    id = as.factor(.data$id),
+    age = as.numeric(.data$age)
+  ) %>%
+  mutate_if(is.character, as.factor) %>%
+  mutate(sex = as.character(.data$sex))
+
+weightings67 <- c(0.1, 0.08, 0.06, 0.04, 0.02, 0, -0.02, -0.04, -0.06, -0.08, -0.1)
+
+data <-
+  c("forecast_mean", "forecast_sd") %>%
+  map2(
+    c("getmean", "getsd"),
+    ~ getforecast(
+      data = data_setup,
+      forecastName = .x,
+      fun = .y,
+      weightings = weightings67
+    )
+  ) %>%
+  reduce(left_join, by = c("reliability_amount", "alignment", "sex", "age", "id", "project", "npv_amount")) %>%
+  mutate(sample = "prolific")
+```
+
+

@@ -1,10 +1,10 @@
 ---
-title: Clean aggregation 5 data
+title: Clean alignment 5 data
 author: Shir Dekel
 date: '`r format(Sys.time())`'
 output_format: html_document
 vignette: >
-  %\VignetteIndexEntry{Clean aggregation 5 data}
+  %\VignetteIndexEntry{Clean alignment 5 data}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---

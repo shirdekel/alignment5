@@ -1,17 +1,16 @@
 #' alignment5
-#' A data package for alignment5.
+#' A data package for the Alignment 5 experiment.
 #' @docType package
 #' @aliases alignment5-package
-#' @title Package Title
+#' @title Alignment 5 experiment
 #' @name alignment5
-#' @description A description of the data package
+#' @description Data and materials for the Alignment 5 experiment.
 #' @details Use \code{data(package='alignment5')$results[, 3]} to see a list of available data sets in this data package
 #'     and/or DataPackageR::load_all
 #' _datasets() to load them.
 #' @seealso
 #' \link{data}
 NULL
-
 
 
 
@@ -32,7 +31,10 @@ NULL
 #' \item{forecast_sd}{}
 #' \item{sample}{}
 #' }
-#' @source The data comes from________________________.
+#' @source The data was collected using Qualtrics.
 #' @seealso
 #' \link{alignment5}
 NULL
+
+
+
